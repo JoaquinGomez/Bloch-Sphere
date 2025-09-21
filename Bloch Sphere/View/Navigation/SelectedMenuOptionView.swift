@@ -7,49 +7,14 @@
 
 import SwiftUI
 import ComplexModule
+import SwiftData
 
 struct SelectedMenuOptionView: View {
+    @Environment(\.modelContext) private var context
+    @Query(sort: \Gate.name, order: .forward) private var gates: [Gate]
+    @Query(sort: \Sequence.name, order: .forward) private var sequences: [Sequence]
+    
     @State var viewModel: ViewModel
-    
-    let gates: [Gate] = [
-        .init(
-            name: "Hadamard",
-            scalar: 1/sqrt(2),
-            matrix: .init(
-                value11: .init(1, 0),
-                value12: .init(1, 0),
-                value21: .init(1, 0),
-                value22: .init(-1, 0)
-            )
-        )
-    ]
-    
-    let sequences: [Sequence] = [
-        .init(
-            name: "Hadamard Gate Twice", gates: [
-                .init(
-                    name: "H",
-                    scalar: 1/sqrt(2),
-                    matrix: .init(
-                        value11: .init(1, 0),
-                        value12: .init(1, 0),
-                        value21: .init(1, 0),
-                        value22: .init(-1, 0)
-                    )
-                ),
-                .init(
-                    name: "H",
-                    scalar: 1/sqrt(2),
-                    matrix: .init(
-                        value11: .init(1, 0),
-                        value12: .init(1, 0),
-                        value21: .init(1, 0),
-                        value22: .init(-1, 0)
-                    )
-                )
-            ]
-        )
-    ]
     
     var body: some View {
         if viewModel.selectedMenuOption == .sequences {
@@ -61,13 +26,36 @@ struct SelectedMenuOptionView: View {
                     SequenceDetailsView(sequence: sequence, applyGates: viewModel.applyGates)
                 }
             }
+            .toolbar {
+                Button("New Sequence") {
+                    let newSequence = Sequence(
+                        name: "Empty Sequence # \(sequences.count + 1)",
+                        gates: []
+                    )
+                    context.insert(newSequence)
+                    try? context.save()
+                }
+            }
         } else if viewModel.selectedMenuOption == .gates {
             NavigationStack {
-                List(gates) { gate in
-                    NavigationLink(gate.name, value: gate)
+                List {
+                    ForEach(gates) { gate in
+                        NavigationLink(gate.name, value: gate)
+                    }
                 }
                 .navigationDestination(for: Gate.self) { gate in
                     GateDetailsView(gate: gate, applyGates: viewModel.applyGates)
+                }
+            }
+            .toolbar {
+                Button("New Gate") {
+                    let newGate = Gate(
+                        name: "Identity Gate Example # \(gates.count + 1)",
+                        scalar: 1,
+                        matrix: .init(value11Real: 1.0, value22Real: 1.0)
+                    )
+                    context.insert(newGate)
+                    try? context.save()
                 }
             }
         } else if viewModel.selectedMenuOption == .qubitState {

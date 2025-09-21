@@ -6,10 +6,12 @@
 //
 
 import Foundation
+import SwiftData
 
-struct Sequence: Hashable, Identifiable {
-    let name: String
-    let gates: [Gate]
+@Model
+class Sequence: Hashable, Identifiable {
+    @Attribute(.unique) var name: String
+    var gates: [Gate]
     
     var id: UUID {
         UUID(uuidString: name) ?? .init()

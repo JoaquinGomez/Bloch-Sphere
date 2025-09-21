@@ -27,8 +27,6 @@ struct Qubit: Hashable {
     func isNormalized() -> Bool {
         let a = alpha.magnitude * alpha.magnitude
         let b = beta.magnitude * beta.magnitude
-        print(a)
-        print(b)
         let sum = a + b
         let magnitude = sum.squareRoot()
         return magnitude <= 1.0000000000000002 && magnitude >= 0.9999999999999998
@@ -37,7 +35,9 @@ struct Qubit: Hashable {
     func numberFrom(_ expression: String) -> Double {
         print(expression)
         do {
-            return try MathEval.evaluate(expression)
+            let result = try MathEval.evaluate(expression)
+            print(result)
+            return result
         } catch {
             print("error")
             return 0

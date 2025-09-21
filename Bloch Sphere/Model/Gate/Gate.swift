@@ -6,11 +6,13 @@
 //
 
 import Foundation
+import SwiftData
 
-struct Gate: Hashable, Identifiable {
-    let name: String
-    let scalar: Double
-    let matrix: Matrix
+@Model
+class Gate: Hashable, Identifiable {
+    @Attribute(.unique) var name: String
+    var scalar: Double
+    var matrix: Matrix
     
     var id: UUID {
         UUID(uuidString: name) ?? .init()

@@ -6,6 +6,7 @@
 //
 
 import SwiftUI
+import SwiftData
 
 @main
 struct Bloch_SphereApp: App {
@@ -14,5 +15,6 @@ struct Bloch_SphereApp: App {
         WindowGroup {
             ContentView()
         }
+        .modelContainer(for: [Gate.self, Sequence.self, Matrix.self])
     }
 }

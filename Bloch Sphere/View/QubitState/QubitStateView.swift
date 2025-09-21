@@ -52,7 +52,9 @@ struct QubitStateView: View {
                 MTMathUILabelRepresentable(latex: $secondStateLaText)
             }
             MTMathUILabelRepresentable(latex: $stateEquation)
-            Text(error ?? "").foregroundStyle(.red).padding()
+            if let error = error {
+                Text(error).foregroundStyle(.red).padding()
+            }
         }
         .onChange(of: basisOption) { _, _ in
             updateBasisOption()
@@ -117,7 +119,7 @@ struct QubitStateView: View {
         if !qubit.isNormalized() {
             error = "Error: Qubit state must be normalized."
         } else {
-            error = ""
+            error = nil
         }
         updateStateEquation()
     }

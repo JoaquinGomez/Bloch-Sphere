@@ -6,6 +6,7 @@
 //
 
 import SwiftUI
+import SwiftData
 
 struct TopMenuView: View {
     @Binding var selectedMenuOption: MenuOption
