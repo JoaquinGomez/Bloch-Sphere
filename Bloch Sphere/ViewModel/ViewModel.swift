@@ -22,7 +22,7 @@ public class ViewModel {
     }
     
     func applyGates(_ gates: [Gate]) {
-        try? spinQubitVectorEntity(Rotation(horizontalAxis: -1, verticalAxis: 0, depthAxis: 0))
+        try? spinQubitVectorEntity(Rotation(horizontalAxis: 1, verticalAxis: 1, depthAxis: 1))
     }
 
     func spinQubitVectorEntity(_ rotation: Rotation) throws {
@@ -35,10 +35,12 @@ public class ViewModel {
             duration: 1,
             bindTarget: .transform
         )
+        
         qubitVectorEntity.playAnimation(animation)
     }
 
     func createGameScene(_ content: any RealityViewContentProtocol) {
+        let all = Entity()
         
         let sphereRadious: Float = 1.0
         let arrowEntity = createArrowEntity(coneSize: 0.03, length: sphereRadious, cylinderRadious: 0.004, color: .cyan)
@@ -46,11 +48,12 @@ public class ViewModel {
         qubitVectorEntity.addChild(arrowEntity)
         
         let sphere = createSphere(radious: sphereRadious)
-        content.add(makeAxis(lenght: sphereRadious * 2 + 0.5, color: .green, orientation: [0, 1, 0], positiveLabel: "|0⟩", negativeLabel: "|𝟣⟩"))
-        content.add(makeAxis(lenght: sphereRadious * 2 + 0.5, color: .red, orientation: [0, 0, -1], positiveLabel: "|+⟩", negativeLabel: "|-⟩"))
-        content.add(makeAxis(lenght: sphereRadious * 2 + 0.5, color: .blue, orientation: [1, 0, 0], positiveLabel: "|i⟩", negativeLabel: "|-i⟩"))
-        content.add(sphere)
-        content.add(qubitVectorEntity)
+        all.addChild(makeAxis(lenght: sphereRadious * 2 + 0.5, color: .green, orientation: [0, 1, 0], positiveLabel: "|0⟩", negativeLabel: "|𝟣⟩"))
+        all.addChild(makeAxis(lenght: sphereRadious * 2 + 0.5, color: .red, orientation: [0, 0, -1], positiveLabel: "|+⟩", negativeLabel: "|-⟩"))
+        all.addChild(makeAxis(lenght: sphereRadious * 2 + 0.5, color: .blue, orientation: [1, 0, 0], positiveLabel: "|i⟩", negativeLabel: "|-i⟩"))
+        all.addChild(sphere)
+        all.addChild(qubitVectorEntity)
+        content.add(all)
         content.add(createCamera())
     }
     
@@ -70,9 +73,11 @@ public class ViewModel {
     func createArrowEntity(coneSize: Float, length: Float, cylinderRadious: Float, color: NSColor) -> Entity {
         let arrowEntity = Entity()
         
+        let material = SimpleMaterial(color: color, isMetallic: true)
+        
         let coneComponent = ModelComponent(
             mesh: .generateCone(height: coneSize, radius: coneSize),
-            materials: [SimpleMaterial(color: color, isMetallic: true)]
+            materials: [material]
         )
         let coneEntity = Entity()
         coneEntity.components.set([coneComponent])
@@ -82,14 +87,35 @@ public class ViewModel {
         let cylinderLenght = length - coneSize
         let cylinderComponent = ModelComponent(
             mesh: .generateCylinder(height: cylinderLenght, radius: cylinderRadious),
-            materials: [SimpleMaterial(color: color, isMetallic: true)]
+            materials: [material]
         )
         let cylinderEntity = Entity()
         cylinderEntity.components.set([cylinderComponent])
         cylinderEntity.position.y = cylinderLenght/2
         arrowEntity.addChild(cylinderEntity)
         
+        let perpendicularIndicatorsLenght = 4 * coneSize
+        
+        arrowEntity.addChild(createPerpendicularComponent(orientation: [1, 0, 0], length: perpendicularIndicatorsLenght, radious: cylinderRadious, yPosition: length / 2, color: .cyan, xPosition: 0, zPosition: perpendicularIndicatorsLenght/2, label: "a"))
+        arrowEntity.addChild(createPerpendicularComponent(orientation: [0, 0, 1], length: perpendicularIndicatorsLenght, radious: cylinderRadious, yPosition: length / 2, color: .cyan, xPosition: -perpendicularIndicatorsLenght/2, zPosition: 0, label: "b"))
+        arrowEntity.addChild(createPerpendicularComponent(orientation: [1, 0, 0], length: perpendicularIndicatorsLenght, radious: cylinderRadious, yPosition: length / 2, color: .cyan, xPosition: 0, zPosition: -perpendicularIndicatorsLenght/2, label: "c"))
+        arrowEntity.addChild(createPerpendicularComponent(orientation: [0, 0, 1], length: perpendicularIndicatorsLenght, radious: cylinderRadious, yPosition: length / 2, color: .cyan, xPosition: perpendicularIndicatorsLenght/2, zPosition: 0, label: "d"))
+        
         return arrowEntity
+    }
+    
+    func createPerpendicularComponent(orientation: SIMD3<Float>, length: Float, radious: Float, yPosition: Float, color: NSColor, xPosition: Float, zPosition: Float, label: String) -> Entity {
+        let material = SimpleMaterial(color: color, isMetallic: true)
+        let perpendicularEntity = Entity()
+        let perpendicularComponent = ModelComponent(mesh: .generateCylinder(height: length, radius: radious), materials: [material])
+        perpendicularEntity.components.set([perpendicularComponent])
+        perpendicularEntity.position.y = yPosition
+        perpendicularEntity.position.x = xPosition
+        perpendicularEntity.position.z = zPosition
+        perpendicularEntity.orientation = simd_quatf(angle: .pi/2, axis: orientation)
+        let labelText = makeText(label, position: [0, 2*xPosition, 0], color: .yellow)
+        perpendicularEntity.addChild(labelText)
+        return perpendicularEntity
     }
     
     func createCamera() -> Entity {

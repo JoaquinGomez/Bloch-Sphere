@@ -39,7 +39,6 @@ struct Qubit: Hashable {
             print(result)
             return result
         } catch {
-            print("error")
             return 0
         }
     }

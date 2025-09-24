@@ -5,7 +5,6 @@
 //  Created by JOAQUIN ENRIQUE GOMEZ LOPEZ on 9/19/25.
 //
 
-import ComplexModule
 import SwiftData
 
 @Model
