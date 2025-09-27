@@ -7,18 +7,19 @@
 
 import Foundation
 import SwiftData
+import ComplexModule
 
 @Model
 class Gate: Hashable, Identifiable {
     @Attribute(.unique) var name: String
-    var scalar: Double
-    var matrix: Matrix
+    var scalar: String
+    var matrix: StringsMatrix
     
     var id: UUID {
         UUID(uuidString: name) ?? .init()
     }
     
-    init(name: String, scalar: Double = 1, matrix: Matrix) {
+    init(name: String, scalar: String = "1", matrix: StringsMatrix) {
         self.name = name
         self.scalar = scalar
         self.matrix = matrix

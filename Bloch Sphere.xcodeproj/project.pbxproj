@@ -12,7 +12,7 @@
 		D253DAFF2E7F200B008D764B /* ComplexModule in Frameworks */ = {isa = PBXBuildFile; productRef = D253DAFE2E7F200B008D764B /* ComplexModule */; };
 		D253DB012E7F200B008D764B /* Numerics in Frameworks */ = {isa = PBXBuildFile; productRef = D253DB002E7F200B008D764B /* Numerics */; };
 		D253DB032E7F200B008D764B /* RealModule in Frameworks */ = {isa = PBXBuildFile; productRef = D253DB022E7F200B008D764B /* RealModule */; };
-		D253DB102E7F3C92008D764B /* Expression in Frameworks */ = {isa = PBXBuildFile; productRef = D253DB0F2E7F3C92008D764B /* Expression */; };
+		D2DCFFDF2E8854C700CE0678 /* Expression in Frameworks */ = {isa = PBXBuildFile; productRef = D2DCFFDE2E8854C700CE0678 /* Expression */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -36,7 +36,7 @@
 				D253DAFF2E7F200B008D764B /* ComplexModule in Frameworks */,
 				D253DB012E7F200B008D764B /* Numerics in Frameworks */,
 				D253DB032E7F200B008D764B /* RealModule in Frameworks */,
-				D253DB102E7F3C92008D764B /* Expression in Frameworks */,
+				D2DCFFDF2E8854C700CE0678 /* Expression in Frameworks */,
 				D253DAEB2E7EED1A008D764B /* Algorithms in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -85,7 +85,7 @@
 				D253DAFE2E7F200B008D764B /* ComplexModule */,
 				D253DB002E7F200B008D764B /* Numerics */,
 				D253DB022E7F200B008D764B /* RealModule */,
-				D253DB0F2E7F3C92008D764B /* Expression */,
+				D2DCFFDE2E8854C700CE0678 /* Expression */,
 			);
 			productName = "Bloch Sphere";
 			productReference = D253DAA22E7E10E0008D764B /* Bloch Sphere.app */;
@@ -119,7 +119,7 @@
 				D253DAE92E7EED1A008D764B /* XCRemoteSwiftPackageReference "swift-algorithms" */,
 				D253DAEC2E7EEDA7008D764B /* XCRemoteSwiftPackageReference "SwiftMath" */,
 				D253DAFD2E7F200B008D764B /* XCRemoteSwiftPackageReference "swift-numerics" */,
-				D253DB0E2E7F3C92008D764B /* XCRemoteSwiftPackageReference "Expression" */,
+				D2DCFFDD2E8854C700CE0678 /* XCRemoteSwiftPackageReference "Expression" */,
 			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = D253DAA32E7E10E0008D764B /* Products */;
@@ -400,7 +400,7 @@
 				minimumVersion = 1.1.0;
 			};
 		};
-		D253DB0E2E7F3C92008D764B /* XCRemoteSwiftPackageReference "Expression" */ = {
+		D2DCFFDD2E8854C700CE0678 /* XCRemoteSwiftPackageReference "Expression" */ = {
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/nicklockwood/Expression";
 			requirement = {
@@ -436,9 +436,9 @@
 			package = D253DAFD2E7F200B008D764B /* XCRemoteSwiftPackageReference "swift-numerics" */;
 			productName = RealModule;
 		};
-		D253DB0F2E7F3C92008D764B /* Expression */ = {
+		D2DCFFDE2E8854C700CE0678 /* Expression */ = {
 			isa = XCSwiftPackageProductDependency;
-			package = D253DB0E2E7F3C92008D764B /* XCRemoteSwiftPackageReference "Expression" */;
+			package = D2DCFFDD2E8854C700CE0678 /* XCRemoteSwiftPackageReference "Expression" */;
 			productName = Expression;
 		};
 /* End XCSwiftPackageProductDependency section */

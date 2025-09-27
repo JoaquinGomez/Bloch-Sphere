@@ -51,8 +51,8 @@ struct SelectedMenuOptionView: View {
                 Button("New Gate") {
                     let newGate = Gate(
                         name: "Identity Gate Example # \(gates.count + 1)",
-                        scalar: 1,
-                        matrix: .init(value11Real: 1.0, value22Real: 1.0)
+                        scalar: "1",
+                        matrix: .init(a11Real: "1", a12Real: "0", a21Real: "0", a22Real: "1", a11Imaginary: "0", a12Imaginary: "0", a21Imaginary: "0", a22Imaginary: "0")
                     )
                     context.insert(newGate)
                     try? context.save()

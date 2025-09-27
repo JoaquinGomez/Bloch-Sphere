@@ -15,6 +15,6 @@ struct Bloch_SphereApp: App {
         WindowGroup {
             ContentView()
         }
-        .modelContainer(for: [Gate.self, Sequence.self, Matrix.self])
+        .modelContainer(for: [Gate.self, Sequence.self, StringsMatrix.self])
     }
 }

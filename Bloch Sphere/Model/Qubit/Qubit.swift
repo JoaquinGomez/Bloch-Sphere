@@ -17,11 +17,11 @@ struct Qubit: Hashable {
     var betaImaginary: String?
     
     var alpha: Complex<Double> {
-        .init(numberFrom(alphaReal ?? "0"), numberFrom(alphaImaginary ?? "0"))
+        .init(alphaReal?.numberEvaluation() ?? 0, alphaImaginary?.numberEvaluation() ?? 0)
     }
     
     var beta: Complex<Double> {
-        .init(numberFrom(betaReal ?? "0"), numberFrom(betaImaginary ?? "0"))
+        .init(betaReal?.numberEvaluation() ?? 0, betaImaginary?.numberEvaluation() ?? 0)
     }
     
     func isNormalized() -> Bool {
@@ -30,16 +30,5 @@ struct Qubit: Hashable {
         let sum = a + b
         let magnitude = sum.squareRoot()
         return magnitude <= 1.0000000000000002 && magnitude >= 0.9999999999999998
-    }
-    
-    func numberFrom(_ expression: String) -> Double {
-        print(expression)
-        do {
-            let result = try MathEval.evaluate(expression)
-            print(result)
-            return result
-        } catch {
-            return 0
-        }
     }
 }

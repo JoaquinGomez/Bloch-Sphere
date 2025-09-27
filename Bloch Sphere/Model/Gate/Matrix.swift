@@ -5,36 +5,54 @@
 //  Created by JOAQUIN ENRIQUE GOMEZ LOPEZ on 9/19/25.
 //
 
-import SwiftData
+import ComplexModule
 
-@Model
-class Matrix: Hashable {
-    var value11Real: Double
-    var value12Real: Double
-    var value21Real: Double
-    var value22Real: Double
-    var value11Imaginary: Double
-    var value12Imaginary: Double
-    var value21Imaginary: Double
-    var value22Imaginary: Double
+struct Matrix: Hashable {
+    var _11Complex: Complex<Double>
+    var _21Complex: Complex<Double>
+    var _12Complex: Complex<Double>
+    var _22Complex: Complex<Double>
     
     init(
-    value11Real: Double = 0,
-    value12Real: Double = 0,
-    value21Real: Double = 0,
-    value22Real: Double = 0,
-    value11Imaginary: Double = 0,
-    value12Imaginary: Double = 0,
-    value21Imaginary: Double = 0,
-    value22Imaginary: Double = 0
+    _11Complex: Complex<Double>,
+    _21Complex: Complex<Double>,
+    _12Complex: Complex<Double>,
+    _22Complex: Complex<Double>,
     ) {
-        self.value11Real = value11Real
-        self.value12Real = value12Real
-        self.value21Real = value21Real
-        self.value22Real = value22Real
-        self.value11Imaginary = value11Imaginary
-        self.value12Imaginary = value12Imaginary
-        self.value21Imaginary = value21Imaginary
-        self.value22Imaginary = value22Imaginary
+        self._11Complex = _11Complex
+        self._12Complex = _12Complex
+        self._21Complex = _21Complex
+        self._22Complex = _22Complex
+    }
+    
+    func transpose() -> Matrix {
+        .init(
+            _11Complex: _11Complex.conjugate,
+            _21Complex: _12Complex.conjugate,
+            _12Complex: _21Complex.conjugate,
+            _22Complex: _22Complex.conjugate
+        )
+    }
+    
+    static func * (a: Matrix, b: Matrix) -> Matrix {
+        return Matrix(
+            _11Complex: (a._11Complex * b._11Complex + a._12Complex * b._21Complex),
+            _21Complex: (a._21Complex * b._11Complex + a._22Complex * b._21Complex),
+            _12Complex: (a._11Complex * b._12Complex + a._12Complex * b._22Complex),
+            _22Complex: (a._21Complex * b._12Complex + a._22Complex * b._22Complex)   
+        )
+    }
+    
+    static func == (lhs: Matrix, rhs: Matrix) -> Bool {
+        equalWithinTolerance(lhs._11Complex, rhs._11Complex, tolerance: 0.0000000000000003) &&
+        equalWithinTolerance(lhs._12Complex, rhs._12Complex, tolerance: 0.0000000000000003) &&
+        equalWithinTolerance(lhs._21Complex, rhs._21Complex, tolerance: 0.0000000000000003) &&
+        equalWithinTolerance(lhs._22Complex, rhs._22Complex, tolerance: 0.0000000000000003)
+    }
+    
+    static func equalWithinTolerance(_ lhs: Complex<Double>, _ rhs: Complex<Double>, tolerance: Double) -> Bool {
+        let delta = lhs - rhs
+        let deltaMagnitude = delta.magnitude
+        return deltaMagnitude >= -tolerance && deltaMagnitude <= tolerance
     }
 }

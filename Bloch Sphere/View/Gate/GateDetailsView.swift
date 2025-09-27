@@ -7,6 +7,7 @@
 
 import SwiftUI
 import SwiftData
+import ComplexModule
 
 struct GateDetailsView: View {
     @Environment(\.modelContext) private var context
@@ -154,61 +155,73 @@ struct GateDetailsView: View {
     
     func loadGateDetails() {
         name = gate.name
-        scalar = String(describing: gate.scalar)
-        a11Real = String(describing: gate.matrix.value11Real)
-        a11Imaginary = String(describing: gate.matrix.value11Imaginary)
-        a12Real = String(describing: gate.matrix.value12Real)
-        a12Imaginary = String(describing: gate.matrix.value12Imaginary)
-        a21Real = String(describing: gate.matrix.value21Real)
-        a21Imaginary = String(describing: gate.matrix.value21Imaginary)
-        a22Real = String(describing: gate.matrix.value22Real)
-        a22Imaginary = String(describing: gate.matrix.value22Imaginary)
+        scalar = gate.scalar
+        a11Real = gate.matrix.a11Real
+        a11Imaginary = gate.matrix.a11Imaginary
+        a12Real = gate.matrix.a12Real
+        a12Imaginary = gate.matrix.a12Imaginary
+        a21Real = gate.matrix.a21Real
+        a21Imaginary = gate.matrix.a21Imaginary
+        a22Real = gate.matrix.a22Real
+        a22Imaginary = gate.matrix.a22Imaginary
     }
     
     func updateGate() {
         gate.name = name
-        gate.scalar = Double(scalar) ?? 0
-        gate.matrix.value11Real = Double(a11Real) ?? 0
-        gate.matrix.value11Imaginary = Double(a11Imaginary) ?? 0
-        gate.matrix.value12Real = Double(a12Real) ?? 0
-        gate.matrix.value12Imaginary = Double(a12Imaginary) ?? 0
-        gate.matrix.value21Real = Double(a21Real) ?? 0
-        gate.matrix.value21Imaginary = Double(a21Imaginary) ?? 0
-        gate.matrix.value22Real = Double(a22Real) ?? 0
-        gate.matrix.value22Imaginary = Double(a22Imaginary) ?? 0
+        gate.scalar = scalar
+        gate.matrix.a11Real = a11Real
+        gate.matrix.a11Imaginary = a11Imaginary
+        gate.matrix.a12Real = a12Real
+        gate.matrix.a12Imaginary = a12Imaginary
+        gate.matrix.a21Real = a21Real
+        gate.matrix.a21Imaginary = a21Imaginary
+        gate.matrix.a22Real = a22Real
+        gate.matrix.a22Imaginary = a22Imaginary
         try? context.save()
         isSaveEnabled = false
     }
     
     func gateDidChange() {
-        let validGate = isGateValid()
-        if !validGate {
-            error = "Error: The Gate is invalid."
+        let isInputValid = isInputValid()
+        if !isInputValid {
+            error = "Error: The input is invalid."
         } else {
             error = nil
         }
-        isSaveEnabled = validGate && didGateChange()
+        let isGateUnitary = isGateUnitary()
+        if !isGateUnitary {
+            error = "Error: The gate is not unitary"
+        } else if isInputValid {
+            error = nil
+        }
+        isSaveEnabled = isInputValid && isGateUnitary && didGateChange()
     }
     
     func didGateChange() -> Bool {
-        return gate.matrix.value11Real != Double(a11Real) ?? 0 ||
-        gate.matrix.value11Imaginary != Double(a11Imaginary) ?? 0 ||
-        gate.matrix.value12Real != Double(a12Real) ?? 0 ||
-        gate.matrix.value12Imaginary != Double(a12Imaginary) ?? 0 ||
-        gate.matrix.value21Real != Double(a21Real) ?? 0 ||
-        gate.matrix.value21Imaginary != Double(a21Imaginary) ?? 0 ||
-        gate.matrix.value22Real != Double(a22Real) ?? 0 ||
-        gate.matrix.value22Imaginary != Double(a22Imaginary) ?? 0 ||
+        return gate.matrix.a11Real != a11Real ||
+        gate.matrix.a11Imaginary != a11Imaginary ||
+        gate.matrix.a12Real != a12Real ||
+        gate.matrix.a12Imaginary != a12Imaginary ||
+        gate.matrix.a21Real != a21Real ||
+        gate.matrix.a21Imaginary != a21Imaginary ||
+        gate.matrix.a22Real != a22Real ||
+        gate.matrix.a22Imaginary != a22Imaginary ||
         gate.name != name ||
-        gate.scalar != Double(scalar) ?? 0
+        gate.scalar != scalar
     }
     
-    func isGateValid() -> Bool {
+    func isInputValid() -> Bool {
         return  !name.isEmpty && !invalidFieldInput(scalar) && Double(scalar) != 0 && !invalidFieldInput(a11Real) && !invalidFieldInput(a11Imaginary) && !invalidFieldInput(a12Real) && !invalidFieldInput(a12Imaginary) && !invalidFieldInput(a21Real) && !invalidFieldInput(a21Imaginary) && !invalidFieldInput(a22Real) && !invalidFieldInput(a22Imaginary)
     }
     
     func invalidFieldInput(_ string: String) -> Bool {
-        let invalid = Double(string) == nil || string.isEmpty
+        let invalid = string.numberEvaluation() == nil || string.isEmpty
         return invalid
+    }
+    
+    func isGateUnitary() -> Bool {
+        let matrixCandidate = StringsMatrix(a11Real: a11Real, a12Real: a12Real, a21Real: a21Real, a22Real: a22Real, a11Imaginary: a11Imaginary, a12Imaginary: a12Imaginary, a21Imaginary: a21Imaginary, a22Imaginary: a22Imaginary).numericMatrix(scalar: scalar.numberEvaluation() ?? 1)
+        let matrix = matrixCandidate.transpose() * matrixCandidate
+        return matrix == Matrix(_11Complex: .init(1), _21Complex: .init(0), _12Complex: .init(0), _22Complex: .init(1))
     }
 }

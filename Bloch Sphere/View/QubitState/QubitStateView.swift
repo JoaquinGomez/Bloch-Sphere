@@ -6,7 +6,6 @@
 //
 
 import SwiftUI
-import ExpressionParser
 
 struct QubitStateView: View {
     @Binding var qubit: Qubit
