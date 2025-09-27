@@ -221,7 +221,7 @@ struct GateDetailsView: View {
     
     func isGateUnitary() -> Bool {
         let matrixCandidate = StringsMatrix(a11Real: a11Real, a12Real: a12Real, a21Real: a21Real, a22Real: a22Real, a11Imaginary: a11Imaginary, a12Imaginary: a12Imaginary, a21Imaginary: a21Imaginary, a22Imaginary: a22Imaginary).numericMatrix(scalar: scalar.numberEvaluation() ?? 1)
-        let matrix = matrixCandidate.transpose() * matrixCandidate
+        let matrix = matrixCandidate.dagger() * matrixCandidate
         return matrix == Matrix(_11Complex: .init(1), _21Complex: .init(0), _12Complex: .init(0), _22Complex: .init(1))
     }
 }

@@ -25,7 +25,7 @@ struct Matrix: Hashable {
         self._22Complex = _22Complex
     }
     
-    func transpose() -> Matrix {
+    func dagger() -> Matrix {
         .init(
             _11Complex: _11Complex.conjugate,
             _21Complex: _12Complex.conjugate,
@@ -48,6 +48,10 @@ struct Matrix: Hashable {
         equalWithinTolerance(lhs._12Complex, rhs._12Complex, tolerance: 0.0000000000000003) &&
         equalWithinTolerance(lhs._21Complex, rhs._21Complex, tolerance: 0.0000000000000003) &&
         equalWithinTolerance(lhs._22Complex, rhs._22Complex, tolerance: 0.0000000000000003)
+    }
+    
+    func determinant() -> Complex<Double> {
+        _11Complex * _22Complex - _12Complex * _21Complex
     }
     
     static func equalWithinTolerance(_ lhs: Complex<Double>, _ rhs: Complex<Double>, tolerance: Double) -> Bool {

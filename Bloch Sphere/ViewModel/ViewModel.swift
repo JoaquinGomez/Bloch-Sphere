@@ -7,6 +7,8 @@
 
 import SwiftUI
 import RealityKit
+import RealModule
+import ComplexModule
 
 @Observable
 public class ViewModel {
@@ -22,6 +24,29 @@ public class ViewModel {
     }
     
     func applyGates(_ gates: [Gate]) {
+        gates.forEach { [weak self] gate in
+            self?.applygate(gate)
+        }
+    }
+    
+    func applygate(_ gate: Gate) {
+        let scalar = gate.scalar.numberEvaluation() ?? 1.0
+        let numericMatrix = gate.matrix.numericMatrix(scalar: scalar)
+        let determinant = numericMatrix.determinant()
+        let sqrtDet = Complex.sqrt(determinant)
+        let a = numericMatrix._11Complex/sqrtDet
+        let b = numericMatrix._12Complex/sqrtDet
+        let c = numericMatrix._21Complex/sqrtDet
+        let d = numericMatrix._22Complex/sqrtDet
+        let angleYFirstParam = min(max((a * c.conjugate - b * d.conjugate).real, -1.0), 1.0)
+        let angleY = asin(angleYFirstParam)
+        let angleXFirstParam = (a * c.conjugate - b * d.conjugate).imaginary
+        let angleXSecondParam = a.magnitude * a.magnitude - b.magnitude * b.magnitude - c.magnitude * c.magnitude + d.magnitude * d.magnitude
+        let angleX = atan2(angleXFirstParam, angleXSecondParam)
+        let angleZFirstParam = (a * d.conjugate - b * c.conjugate).imaginary
+        let angleZSecondParam = (a * d.conjugate + b * c.conjugate).imaginary
+        let angleZ = atan2(angleZFirstParam, angleZSecondParam)
+        
         try? spinQubitVectorEntity(Rotation(horizontalAxis: 1, verticalAxis: 1, depthAxis: 1))
     }
 
