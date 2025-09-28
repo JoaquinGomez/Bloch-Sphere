@@ -9,6 +9,7 @@ import SwiftUI
 import RealityKit
 import RealModule
 import ComplexModule
+import simd
 
 @Observable
 public class ViewModel {
@@ -43,26 +44,54 @@ public class ViewModel {
         let angleXFirstParam = (a * c.conjugate - b * d.conjugate).imaginary
         let angleXSecondParam = a.magnitude * a.magnitude - b.magnitude * b.magnitude - c.magnitude * c.magnitude + d.magnitude * d.magnitude
         let angleX = atan2(angleXFirstParam, angleXSecondParam)
-        let angleZFirstParam = (a * d.conjugate - b * c.conjugate).imaginary
-        let angleZSecondParam = (a * d.conjugate + b * c.conjugate).imaginary
+        let angleZFirstParam = -((a * d.conjugate) - (b * c.conjugate)).imaginary
+        let angleZSecondParam =  ((a * d.conjugate) + (b * c.conjugate)).real
         let angleZ = atan2(angleZFirstParam, angleZSecondParam)
         
-        try? spinQubitVectorEntity(Rotation(horizontalAxis: 1, verticalAxis: 1, depthAxis: 1))
+        try? spinQubitVectorEntity(xAngle: angleX, yAngle: angleY, zAngle: angleZ)
     }
 
-    func spinQubitVectorEntity(_ rotation: Rotation) throws {
-        qubitVectorEntity.components.set(rotation)
-        
-        let spinAction = SpinAction(revolutions: 0.5, localAxis: rotation.spinAxis)
-        
-        let animation = try AnimationResource.makeActionAnimation(
-            for: spinAction,
-            duration: 1,
-            bindTarget: .transform
-        )
-        
-        qubitVectorEntity.playAnimation(animation)
+    private func localAxis(forWorldAxis worldAxis: SIMD3<Float>, of entity: Entity) -> SIMD3<Float> {
+        let worldToLocal = simd_inverse(entity.transformMatrix(relativeTo: nil))
+        let local = worldToLocal * SIMD4<Float>(worldAxis.x, worldAxis.y, worldAxis.z, 0)
+        return simd_normalize(SIMD3<Float>(local.x, local.y, local.z))
     }
+
+    func spinQubitVectorEntity(xAngle: Double, yAngle: Double, zAngle: Double) throws {
+        let xBlochWorld = SIMD3<Float>(1, 0, 0)
+        let yBlochWorld = SIMD3<Float>(0, 0, 1)
+        let zBlochWorld = SIMD3<Float>(0, 1, 0)
+        
+        let xRevolutions = Float(xAngle / (2 * .pi))
+        let yRevolutions = Float((-yAngle) / (2 * .pi))
+        let zRevolutions = Float(zAngle / (2 * .pi))
+        
+        let steps: [(Float, SIMD3<Float>)] = [
+            (zAngle == 0 ? 0 : zRevolutions, zBlochWorld),
+            (yAngle == 0 ? 0 : yRevolutions, yBlochWorld),
+            (xAngle == 0 ? 0 : xRevolutions, xBlochWorld),
+        ]
+
+        let duration: Double = 1.0
+
+        Task {
+            for (revs, worldAxis) in steps {
+                guard revs != 0 else { continue }
+
+                let local = localAxis(forWorldAxis: worldAxis, of: qubitVectorEntity)
+                let action = SpinAction(revolutions: revs, localAxis: local)
+                let anim = try AnimationResource.makeActionAnimation(
+                    for: action,
+                    duration: duration,
+                    bindTarget: .transform
+                )
+
+                qubitVectorEntity.playAnimation(anim)
+                try await Task.sleep(nanoseconds: UInt64(duration * 1_000_000_000))
+            }
+        }
+    }
+
 
     func createGameScene(_ content: any RealityViewContentProtocol) {
         let all = Entity()
