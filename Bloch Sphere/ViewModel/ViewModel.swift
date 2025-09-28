@@ -32,6 +32,16 @@ public class ViewModel {
         try? spinQubitVectorEntity(steps: steps)
     }
     
+    func moveQubitVectorEntityTo(_ r: SIMD3<Float>) {
+        let len = simd_length(r)
+        let dir = simd_normalize(r)
+        let rot = simd_quatf(from: SIMD3<Float>(0, 1, 0), to: dir)
+
+        qubitVectorEntity.setOrientation(rot, relativeTo: nil)
+        qubitVectorEntity.setScale(SIMD3<Float>(1, len, 1), relativeTo: nil)
+        qubitVectorEntity.setPosition(.zero, relativeTo: nil)
+    }
+    
     func stepsFromGate(_ gate: Gate) -> [GateStep] {
         let scalar = gate.scalar.numberEvaluation() ?? 1.0
         let numericMatrix = gate.matrix.numericMatrix(scalar: scalar)

@@ -59,7 +59,7 @@ struct SelectedMenuOptionView: View {
                 }
             }
         } else if viewModel.selectedMenuOption == .qubitState {
-            QubitStateView(qubit: $viewModel.qubit, basisOption: $viewModel.qubit.basis)
+            QubitStateView(qubit: $viewModel.qubit, basisOption: $viewModel.qubit.basis, moveQubit: viewModel.moveQubitVectorEntityTo)
         }
     }
 }

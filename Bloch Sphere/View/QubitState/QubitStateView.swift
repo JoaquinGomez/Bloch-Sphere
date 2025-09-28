@@ -24,6 +24,9 @@ struct QubitStateView: View {
     
     @State private var error: String? = nil
     
+    
+    let moveQubit: (SIMD3<Float>) -> Void
+    
     var body: some View {
         VStack {
             Text("Qubit State View").padding()
@@ -80,7 +83,7 @@ struct QubitStateView: View {
         firstStateLaTex = qubit.basis.values().firstSate
         secondStateLaText = qubit.basis.values().secondState
         qubit.basis = basisOption
-        updateStateEquation()
+        updateStateAndEquation()
     }
     
     func populateCoeficients() {
@@ -88,11 +91,13 @@ struct QubitStateView: View {
         firstStateImaginaryNumber = qubit.alphaImaginary ?? ""
         secondStateRealNumber = qubit.betaReal ?? ""
         secondStateImaginaryNumber = qubit.betaImaginary ?? ""
-        updateStateEquation()
+        updateStateAndEquation()
     }
         
-    func updateStateEquation() {
+    func updateStateAndEquation() {
         stateEquation = "|\\psi\\rangle = \(formatNumber(firstStateRealNumber, asComplex: false)) \(formatNumber(firstStateImaginaryNumber, asComplex: true)) \(basisOption.values().firstSate) + \(formatNumber(secondStateRealNumber, asComplex: false)) \(formatNumber(secondStateImaginaryNumber, asComplex: true)) \(basisOption.values().secondState)"
+        
+        moveQubit(qubit.rVector())
     }
     
     func formatNumber(_ string: String, asComplex: Bool) -> String {
@@ -120,6 +125,6 @@ struct QubitStateView: View {
         } else {
             error = nil
         }
-        updateStateEquation()
+        updateStateAndEquation()
     }
 }
