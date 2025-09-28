@@ -14,10 +14,7 @@ class Gate: Hashable, Identifiable {
     @Attribute(.unique) var name: String
     var scalar: String
     var matrix: StringsMatrix
-    
-    var id: UUID {
-        UUID(uuidString: name) ?? .init()
-    }
+    var id: UUID = UUID()
     
     init(name: String, scalar: String = "1", matrix: StringsMatrix) {
         self.name = name

@@ -13,9 +13,9 @@ class Sequence: Hashable, Identifiable {
     @Attribute(.unique) var name: String
     var gates: [Gate]
     
-    var id: UUID {
-        UUID(uuidString: name) ?? .init()
-    }
+    var id = UUID()
+    
+    @Relationship var steps: [SequenceStep] = []
     
     init(name: String, gates: [Gate]) {
         self.name = name

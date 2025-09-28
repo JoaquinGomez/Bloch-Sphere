@@ -17,7 +17,7 @@ struct SequenceDetailsView: View {
     
     @State private var name: String = ""
     @State private var error: String? = ""
-    @State private var selectedGates: [Gate] = []
+    @State private var selectedSteps: [SequenceStep] = []
     
     @Query(sort: \Gate.name, order: .forward) private var allGates: [Gate]
 
@@ -46,8 +46,20 @@ struct SequenceDetailsView: View {
                             }
                         }
                     }
-                    List(selectedGates) { gate in
-                        Text(gate.name)
+                    List {
+                        ForEach(Array(selectedSteps.enumerated()), id: \.offset) { idx, step in
+                            HStack {
+                                Text(step.gate.name)
+                                Spacer()
+                                Text("#\(step.position)")
+                            }
+                            .contextMenu {
+                                Button("Delete") {
+                                    selectedSteps.remove(at: idx)
+                                    for (i, s) in selectedSteps.enumerated() { s.position = i }
+                                }
+                            }
+                        }
                     }
                 }
             } else {
@@ -66,7 +78,9 @@ struct SequenceDetailsView: View {
                         }
                         .contentShape(Rectangle())
                         .onTapGesture {
-                            selectedGates.append(gate)
+                            let pos = selectedSteps.count
+                            let step = SequenceStep(position: pos, gate: gate)
+                            selectedSteps.append(step)
                             isAppendingGates = false
                         }
                     }
@@ -75,7 +89,7 @@ struct SequenceDetailsView: View {
             Spacer(minLength: 50)
             HStack {
                 Button(action: {
-                    applyGates(sequence.gates)
+                    applyGates(sequence.steps.map(\.gate))
                 }) {
                     Text("Apply sequence")
                 }
@@ -106,7 +120,7 @@ struct SequenceDetailsView: View {
         .onChange(of: name) { _, _ in
             sequnceDidChange()
         }
-        .onChange(of: selectedGates) { _, _ in
+        .onChange(of: selectedSteps) { _, _ in
             sequnceDidChange()
         }
         .alert("No available gates", isPresented: $showNoGatesToAttempt) {
@@ -120,12 +134,15 @@ struct SequenceDetailsView: View {
     
     func loadSequenceDetails() {
         name = sequence.name
-        selectedGates = sequence.gates
+        selectedSteps = sequence.steps.sorted { $0.position < $1.position }
     }
     
     func updateSequence() {
         sequence.name = name
-        sequence.gates = selectedGates
+        sequence.steps = selectedSteps.enumerated().map { i, s in
+            s.position = i
+            return s
+        }
         try? context.save()
         isSaveEnabled = false
     }
@@ -140,6 +157,6 @@ struct SequenceDetailsView: View {
     }
     
     func didSequenceChange() -> Bool {
-        selectedGates != sequence.gates || name != sequence.name
+        selectedSteps != sequence.steps || name != sequence.name
     }
 }
