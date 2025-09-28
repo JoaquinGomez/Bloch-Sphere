@@ -25,12 +25,14 @@ public class ViewModel {
     }
     
     func applyGates(_ gates: [Gate]) {
+        var steps: [GateStep] = []
         gates.forEach { [weak self] gate in
-            self?.applygate(gate)
+            steps.append(contentsOf: self!.stepsFromGate(gate))
         }
+        try? spinQubitVectorEntity(steps: steps)
     }
     
-    func applygate(_ gate: Gate) {
+    func stepsFromGate(_ gate: Gate) -> [GateStep] {
         let scalar = gate.scalar.numberEvaluation() ?? 1.0
         let numericMatrix = gate.matrix.numericMatrix(scalar: scalar)
         let determinant = numericMatrix.determinant()
@@ -48,7 +50,20 @@ public class ViewModel {
         let angleZSecondParam =  ((a * d.conjugate) + (b * c.conjugate)).real
         let angleZ = atan2(angleZFirstParam, angleZSecondParam)
         
-        try? spinQubitVectorEntity(xAngle: angleX, yAngle: angleY, zAngle: angleZ)
+        let xBlochWorld = SIMD3<Float>(1, 0, 0)
+        let yBlochWorld = SIMD3<Float>(0, 0, 1)
+        let zBlochWorld = SIMD3<Float>(0, 1, 0)
+        
+        let xRevolutions = Float(angleX / (2 * .pi))
+        let yRevolutions = Float((-angleY) / (2 * .pi))
+        let zRevolutions = Float(angleZ / (2 * .pi))
+        
+        let steps: [GateStep] = [
+            .init(name: "Z Axis Angle for \(gate.name) gate", axis: .z, revolutions: angleZ == 0 ? 0 : zRevolutions, localAxis:  zBlochWorld),
+            .init(name: "Y Axis Angle for \(gate.name) gate", axis: .y, revolutions: angleY == 0 ? 0 : yRevolutions, localAxis:  yBlochWorld),
+            .init(name: "X Axis Angle for \(gate.name) gate", axis: .x, revolutions: angleX == 0 ? 0 : xRevolutions, localAxis:  xBlochWorld),
+        ]
+        return steps
     }
 
     private func localAxis(forWorldAxis worldAxis: SIMD3<Float>, of entity: Entity) -> SIMD3<Float> {
@@ -57,29 +72,15 @@ public class ViewModel {
         return simd_normalize(SIMD3<Float>(local.x, local.y, local.z))
     }
 
-    func spinQubitVectorEntity(xAngle: Double, yAngle: Double, zAngle: Double) throws {
-        let xBlochWorld = SIMD3<Float>(1, 0, 0)
-        let yBlochWorld = SIMD3<Float>(0, 0, 1)
-        let zBlochWorld = SIMD3<Float>(0, 1, 0)
-        
-        let xRevolutions = Float(xAngle / (2 * .pi))
-        let yRevolutions = Float((-yAngle) / (2 * .pi))
-        let zRevolutions = Float(zAngle / (2 * .pi))
-        
-        let steps: [(Float, SIMD3<Float>)] = [
-            (zAngle == 0 ? 0 : zRevolutions, zBlochWorld),
-            (yAngle == 0 ? 0 : yRevolutions, yBlochWorld),
-            (xAngle == 0 ? 0 : xRevolutions, xBlochWorld),
-        ]
-
+    func spinQubitVectorEntity(steps: [GateStep]) throws {
         let duration: Double = 1.0
 
         Task {
-            for (revs, worldAxis) in steps {
-                guard revs != 0 else { continue }
+            for (step) in steps {
+                guard step.revolutions != 0 else { continue }
 
-                let local = localAxis(forWorldAxis: worldAxis, of: qubitVectorEntity)
-                let action = SpinAction(revolutions: revs, localAxis: local)
+                let local = localAxis(forWorldAxis: step.localAxis, of: qubitVectorEntity)
+                let action = SpinAction(revolutions: step.revolutions, localAxis: local)
                 let anim = try AnimationResource.makeActionAnimation(
                     for: action,
                     duration: duration,
