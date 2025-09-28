@@ -59,7 +59,7 @@ struct SequenceDetailsView: View {
                                     for (i, s) in selectedSteps.enumerated() { s.position = i }
                                 }
                             }
-                        }
+                        }.onMove(perform: moveSteps)
                     }
                 }
             } else {
@@ -89,7 +89,7 @@ struct SequenceDetailsView: View {
             Spacer(minLength: 50)
             HStack {
                 Button(action: {
-                    applyGates(sequence.steps.map(\.gate))
+                    applyGates(sequence.steps.sorted { $0.position < $1.position }.map(\.gate))
                 }) {
                     Text("Apply sequence")
                 }
@@ -118,10 +118,10 @@ struct SequenceDetailsView: View {
             error = newValue.isEmpty ? "Name is required" : nil
         }
         .onChange(of: name) { _, _ in
-            sequnceDidChange()
+            sequenceDidChange()
         }
         .onChange(of: selectedSteps) { _, _ in
-            sequnceDidChange()
+            sequenceDidChange()
         }
         .alert("No available gates", isPresented: $showNoGatesToAttempt) {
             Button("Dismiss") {
@@ -139,15 +139,17 @@ struct SequenceDetailsView: View {
     
     func updateSequence() {
         sequence.name = name
-        sequence.steps = selectedSteps.enumerated().map { i, s in
-            s.position = i
-            return s
+        for (i, step) in selectedSteps.enumerated() { step.position = i; step.sequence = sequence }
+        sequence.steps = selectedSteps
+        do {
+            try context.save()
+            isSaveEnabled = false
+        } catch {
+            self.error = "Save failed: \(error.localizedDescription)"
         }
-        try? context.save()
-        isSaveEnabled = false
     }
     
-    func sequnceDidChange() {
+    func sequenceDidChange() {
         if name.isEmpty {
             error = "A name is required for the Sequence."
         } else {
@@ -158,5 +160,11 @@ struct SequenceDetailsView: View {
     
     func didSequenceChange() -> Bool {
         selectedSteps != sequence.steps || name != sequence.name
+    }
+    
+    @MainActor
+    func moveSteps(from source: IndexSet, to destination: Int) {
+        selectedSteps.move(fromOffsets: source, toOffset: destination)
+        for (i, step) in selectedSteps.enumerated() { step.position = i }
     }
 }
